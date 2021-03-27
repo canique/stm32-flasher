@@ -6,6 +6,7 @@ The python script can be used to send a binary file to an ST microcontroller.
 
 ## Usage
 python3 upload.py flashfile.bin [serialDevice] [baudrate]
+
 e.g.:
 python3 upload.py flashfile.bin /dev/ttyS1 500000
 
