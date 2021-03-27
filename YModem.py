@@ -44,14 +44,14 @@ class YModem(object):
             self.log.error(str(e))
         finally:
             file_stream.close()
-        
+
         self.log.debug("Task Done!")
         self.log.debug("File: " + file_name)
         self.log.debug("Size: " + str(file_sent) + "Bytes")
         self.log.debug("Packets: " + str(self.st.get_valid_sent_packets()))
         return file_sent
 
-    def wait_for_next(self, ch): 
+    def wait_for_next(self, ch):
         cancel_count = 0
         while True:
             c = self.getc(1)
@@ -67,12 +67,12 @@ class YModem(object):
                 else:
                     self.log.warn("Expected " + hex(ord(ch)) + ", but got " + hex(ord(c)))
         return 0
-                        
+
     def send(self, data_stream, data_name, data_size, retry=20, callback=None):
         packet_size = 1024
 
         # [<<< CRC]
-        self.wait_for_next(CRC)
+        #### self.wait_for_next(CRC) #on first packet we must send instantly
 
         # [first packet >>>]
         header = self._make_edge_packet_header()
@@ -102,8 +102,8 @@ class YModem(object):
         # [<<< ACK]
         # [<<< CRC]
         self.wait_for_next(ACK)
-        self.wait_for_next(CRC)
-        
+        self.wait_for_next(CRC) #we just get an ACK or CAN, no CRC
+
         # [data packet >>>]
         # [<<< ACK]
         error_count = 0
@@ -119,7 +119,7 @@ class YModem(object):
 
             if extracted_data_bytes <= 128:
                 packet_size = 128
-            
+
             header = self._make_data_packet_header(packet_size, sequence)
             data = data.ljust(packet_size, self.data_pad)
             checksum = self._make_send_checksum(data)
@@ -154,16 +154,16 @@ class YModem(object):
         # [<<< NAK]
         # [EOT >>>]
         # [<<< ACK]
-        self.putc(EOT)
-        self.log.debug(">>> EOT")
-        self.wait_for_next(NAK)
+        #self.putc(EOT)
+        #self.log.debug(">>> EOT")
+        #self.wait_for_next(NAK)
         self.putc(EOT)
         self.log.debug(">>> EOT")
         self.wait_for_next(ACK)
 
         # [<<< CRC]
-        self.wait_for_next(CRC)
-        
+        # self.wait_for_next(CRC)
+
         # [Final packet >>>]
         header = self._make_edge_packet_header()
         data = "".ljust(128, bytes.decode(self.header_pad))
@@ -227,7 +227,7 @@ class YModem(object):
                     break
                 else:
                     self.log.warn("Expected 0x01(SOH)/0x02(STX)/0x18(CAN), but got " + hex(ord(c)))
-        
+
         IS_FIRST_PACKET = True
         FIRST_PACKET_RECEIVED = False
         WAIT_FOR_EOT = False
@@ -317,8 +317,8 @@ class YModem(object):
         self.log.debug("File: " + self.rt.get_task_name())
         self.log.debug("Size: " + str(self.rt.get_task_size()) + "Bytes")
         self.log.debug("Packets: " + str(self.rt.get_valid_received_packets()))
-        return self.rt.get_valid_received_bytes()        
-                        
+        return self.rt.get_valid_received_bytes()
+
     # Header byte
     def _make_edge_packet_header(self):
         _bytes = [ord(SOH), 0, 0xff]
