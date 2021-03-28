@@ -23,7 +23,7 @@ if __name__ == '__main__':
     print("Using serial device {} @ speed {} bps".format(serialDevice, bdRate))
 
 
-    serial_io = serial.Serial(serialDevice, baudrate=bdRate)
+    serial_io = serial.Serial(serialDevice, baudrate=bdRate, data_pad=b'\xFF')
     #serial_io.parity = "N"
     #serial_io.bytesize = 8
     #serial_io.stopbits = 1
@@ -44,4 +44,5 @@ if __name__ == '__main__':
     sent = sender.send_file(file_path)
 
     print("Sent {} bytes".format(sent))
+
     serial_io.close()
