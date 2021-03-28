@@ -23,7 +23,7 @@ if __name__ == '__main__':
     print("Using serial device {} @ speed {} bps".format(serialDevice, bdRate))
 
 
-    serial_io = serial.Serial(serialDevice, baudrate=bdRate, data_pad=b'\xFF')
+    serial_io = serial.Serial(serialDevice, baudrate=bdRate)
     #serial_io.parity = "N"
     #serial_io.bytesize = 8
     #serial_io.stopbits = 1
@@ -35,7 +35,7 @@ if __name__ == '__main__':
     def sender_putc(data, timeout=15):
         return serial_io.write(data)
 
-    sender = YModem(sender_getc, sender_putc)
+    sender = YModem(sender_getc, sender_putc, data_pad=b'\xFF')
     os.chdir(sys.path[0])
 
     serial_io.write('d'.encode()) # start download - specific command to CANIQUE devices
